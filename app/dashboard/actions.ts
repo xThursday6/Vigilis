@@ -5,6 +5,23 @@ import { createClient } from '@/utils/supabase/server'
 
 type SwitchState = { error: string | null }
 
+export async function checkIn(switchId: string): Promise<void> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return
+
+  await supabase.from('checkins').insert({
+    switch_id: switchId,
+    user_id: user.id,
+    checked_in_at: new Date().toISOString(),
+  })
+
+  revalidatePath('/dashboard')
+}
+
 export async function createSwitch(
   _prevState: SwitchState,
   formData: FormData
