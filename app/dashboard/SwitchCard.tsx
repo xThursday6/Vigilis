@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import CheckInButton from './CheckInButton'
 import { deleteSwitch, updateSwitch, sendTestAlert } from './actions'
@@ -19,7 +19,6 @@ type Switch = {
 type Props = {
   sw: Switch
   lastCheckin: string | null
-  onDeleted: (id: string) => void
 }
 
 const inputClass =
@@ -27,60 +26,56 @@ const inputClass =
 
 const labelClass = 'text-[11px] text-white/30'
 
-export default function SwitchCard({ sw, lastCheckin, onDeleted }: Props) {
+export default function SwitchCard({ sw, lastCheckin }: Props) {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
   const [mode, setMode] = useState<'view' | 'edit' | 'delete-confirm'>('view')
-  const [editError, setEditError] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [editError, setEditError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
   const [testState, setTestState] = useState<'idle' | 'sent' | 'error'>('idle')
   const [testError, setTestError] = useState<string | null>(null)
 
-  function handleDelete() {
-    setIsDeleting(true)
+  async function handleDelete() {
+    console.log('delete button clicked', sw.id)
+    setDeleting(true)
     setDeleteError(null)
-    startTransition(async () => {
-      const result = await deleteSwitch(sw.id)
-      if (result.error) {
-        setDeleteError(result.error)
-        setIsDeleting(false)
-        return
-      }
-      onDeleted(sw.id)   // removes card from list immediately
-      router.refresh()   // syncs server state in the background
-    })
+    const result = await deleteSwitch(sw.id)
+    if (result.error) {
+      setDeleteError(result.error)
+      setDeleting(false)
+      return
+    }
+    router.push('/dashboard')
   }
 
-  function handleTest() {
+  async function handleTest() {
     setTestState('idle')
     setTestError(null)
-    startTransition(async () => {
-      const result = await sendTestAlert(sw.id)
-      if (result.error) {
-        setTestState('error')
-        setTestError(result.error)
-      } else {
-        setTestState('sent')
-        setTimeout(() => setTestState('idle'), 4000)
-      }
-    })
+    const result = await sendTestAlert(sw.id)
+    if (result.error) {
+      setTestState('error')
+      setTestError(result.error)
+    } else {
+      setTestState('sent')
+      setTimeout(() => setTestState('idle'), 4000)
+    }
   }
 
-  function handleSave(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    setSaving(true)
+    setEditError(null)
     const formData = new FormData(e.currentTarget)
     formData.set('switch_id', sw.id)
-    startTransition(async () => {
-      const result = await updateSwitch(formData)
-      if (result.error) {
-        setEditError(result.error)
-      } else {
-        setEditError(null)
-        setMode('view')
-        router.refresh()
-      }
-    })
+    const result = await updateSwitch(formData)
+    setSaving(false)
+    if (result.error) {
+      setEditError(result.error)
+    } else {
+      setMode('view')
+      router.refresh()
+    }
   }
 
   return (
@@ -121,12 +116,11 @@ export default function SwitchCard({ sw, lastCheckin, onDeleted }: Props) {
             <div>
               <dt className="text-[11px] text-white/30 mb-0.5">Last check-in</dt>
               <dd className="text-sm text-white/60">
-                {lastCheckin ? new Date(lastCheckin).toLocaleString() : 'Never'}
+                {lastCheckin ? new Date(lastCheckin).toUTCString() : 'Never'}
               </dd>
             </div>
           </dl>
 
-          {/* Action strip */}
           <div className="flex items-center gap-5 border-t border-white/5 pt-4">
             <button
               onClick={() => { setEditError(null); setMode('edit') }}
@@ -134,19 +128,15 @@ export default function SwitchCard({ sw, lastCheckin, onDeleted }: Props) {
             >
               Edit
             </button>
-
             <button
               onClick={handleTest}
-              disabled={isPending}
-              className="text-xs text-white/40 hover:text-white/70 disabled:opacity-40 transition-colors"
+              className="text-xs text-white/40 hover:text-white/70 transition-colors"
             >
               {testState === 'sent' ? 'Test sent ✓' : 'Test alert'}
             </button>
-
             {testState === 'error' && (
               <span className="text-xs text-red-400">{testError}</span>
             )}
-
             <button
               onClick={() => setMode('delete-confirm')}
               className="text-xs text-red-500/40 hover:text-red-400 transition-colors ml-auto"
@@ -167,14 +157,14 @@ export default function SwitchCard({ sw, lastCheckin, onDeleted }: Props) {
           <div className="flex items-center gap-4">
             <button
               onClick={handleDelete}
-              disabled={isDeleting}
+              disabled={deleting}
               className="text-sm text-red-400 hover:text-red-300 disabled:opacity-40 transition-colors"
             >
-              {isDeleting ? 'Deleting…' : 'Yes, delete it'}
+              {deleting ? 'Deleting…' : 'Yes, delete it'}
             </button>
             <button
               onClick={() => { setMode('view'); setDeleteError(null) }}
-              disabled={isDeleting}
+              disabled={deleting}
               className="text-sm text-white/40 hover:text-white/70 disabled:opacity-40 transition-colors"
             >
               Cancel
@@ -210,7 +200,6 @@ export default function SwitchCard({ sw, lastCheckin, onDeleted }: Props) {
                 className={inputClass}
               />
             </div>
-
             <div className="flex flex-col gap-1.5 sm:col-span-2">
               <label className={labelClass}>
                 Contact&apos;s name{' '}
@@ -278,18 +267,18 @@ export default function SwitchCard({ sw, lastCheckin, onDeleted }: Props) {
 
           {editError && <p className="text-sm text-red-400 mb-3">{editError}</p>}
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 mt-4">
             <button
               type="submit"
-              disabled={isPending}
+              disabled={saving}
               className="text-sm text-white/80 hover:text-white disabled:opacity-40 transition-colors"
             >
-              {isPending ? 'Saving…' : 'Save changes'}
+              {saving ? 'Saving…' : 'Save changes'}
             </button>
             <button
               type="button"
               onClick={() => { setMode('view'); setEditError(null) }}
-              disabled={isPending}
+              disabled={saving}
               className="text-sm text-white/40 hover:text-white/70 disabled:opacity-40 transition-colors"
             >
               Cancel

@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npx trigger.dev@latest init -p proj_tyopuycqksbzbhvitgqh)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(grep -rl \"from.*proxy\\\\|require.*proxy\" /Users/Dylan/Claude/Vigilis --include=*.ts --include=*.tsx)"
     ]
   }
 }
