@@ -35,10 +35,22 @@ export const checkInMonitor = schedules.task({
     logger.log(`Checking ${switches.length} active switch(es)`);
 
     for (const sw of switches) {
-      // Build deadline and grace deadline in UTC from check_in_time "HH:MM"
-      const deadline = new Date(`${todayStr}T${sw.check_in_time}:00.000Z`);
+      // Build deadline and grace deadline in UTC from check_in_time "HH:MM".
+      // Use Date.UTC with numeric components instead of string interpolation
+      // so that format variations in check_in_time never produce Invalid Date.
+      const [checkHour, checkMinute] = sw.check_in_time.split(":").map(Number);
+      const deadline = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate(),
+          checkHour,
+          checkMinute,
+          0
+        )
+      );
       const graceDeadline = new Date(
-        deadline.getTime() + sw.grace_period_minutes * 60 * 1000
+        deadline.getTime() + Number(sw.grace_period_minutes) * 60 * 1000
       );
 
       // Grace period hasn't elapsed yet — nothing to do

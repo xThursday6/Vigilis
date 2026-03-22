@@ -19,4 +19,10 @@ export default defineConfig({
     },
   },
   dirs: ["trigger"],
+  build: {
+    // Packages that use native Node.js APIs (fetch, crypto, tls) don't
+    // bundle cleanly with esbuild. Mark them external so they're resolved
+    // from node_modules at runtime instead of inlined at build time.
+    external: ["@supabase/supabase-js", "@supabase/ssr", "resend"],
+  },
 });
