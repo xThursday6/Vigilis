@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import { logout } from '@/app/auth/actions'
 import CreateSwitchForm from './CreateSwitchForm'
-import SwitchCard from './SwitchCard'
+import SwitchesList from './SwitchesList'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -71,15 +71,7 @@ export default async function DashboardPage() {
             <h2 className="text-xs font-medium tracking-widest uppercase text-white/30 mb-5">
               Your switches
             </h2>
-            <ul className="flex flex-col gap-3">
-              {switches.map((sw) => (
-                <SwitchCard
-                  key={sw.id}
-                  sw={sw}
-                  lastCheckin={lastCheckin[sw.id] ?? null}
-                />
-              ))}
-            </ul>
+            <SwitchesList switches={switches} lastCheckin={lastCheckin} />
           </section>
         )}
 

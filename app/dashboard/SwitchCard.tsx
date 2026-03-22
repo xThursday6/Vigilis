@@ -18,6 +18,7 @@ type Switch = {
 type Props = {
   sw: Switch
   lastCheckin: string | null
+  onDeleted: (id: string) => void
 }
 
 const inputClass =
@@ -25,7 +26,7 @@ const inputClass =
 
 const labelClass = 'text-[11px] text-white/30'
 
-export default function SwitchCard({ sw, lastCheckin }: Props) {
+export default function SwitchCard({ sw, lastCheckin, onDeleted }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [mode, setMode] = useState<'view' | 'edit' | 'delete-confirm'>('view')
@@ -45,8 +46,8 @@ export default function SwitchCard({ sw, lastCheckin }: Props) {
         setIsDeleting(false)
         return
       }
-      router.refresh()
-      // isDeleting stays true — component unmounts once refresh completes
+      onDeleted(sw.id)   // removes card from list immediately
+      router.refresh()   // syncs server state in the background
     })
   }
 
