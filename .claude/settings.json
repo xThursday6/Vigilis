@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx trigger.dev@latest init -p proj_tyopuycqksbzbhvitgqh)",
+      "Bash(npm install:*)"
+    ]
+  }
+}
