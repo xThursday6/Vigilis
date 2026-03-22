@@ -36,71 +36,93 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] p-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-semibold text-[var(--foreground)]">Dashboard</h1>
+    <div className="min-h-screen bg-[#0e0e0e]">
+      {/* Nav */}
+      <nav className="border-b border-white/5">
+        <div className="max-w-3xl mx-auto px-6 h-14 flex items-center justify-between">
+          <span className="text-white/90 font-medium tracking-tight">Vigilis</span>
           <form action={logout}>
             <button
               type="submit"
-              className="rounded-md border border-[var(--foreground)]/20 px-4 py-2 text-sm text-[var(--foreground)] hover:border-[var(--foreground)]/60"
+              className="text-sm text-white/40 hover:text-white/70 transition-colors"
             >
               Sign out
             </button>
           </form>
         </div>
+      </nav>
 
-        <div className="rounded-lg border border-[var(--foreground)]/10 p-6 mb-6">
-          <p className="text-sm text-[var(--foreground)]/60 mb-1">Signed in as</p>
-          <p className="text-[var(--foreground)] font-medium">{user.email}</p>
-        </div>
+      <div className="max-w-3xl mx-auto px-6 py-12">
+        {/* Account */}
+        <p className="text-xs text-white/30 mb-10">{user.email}</p>
 
-        <CreateSwitchForm />
-
-        <div>
-          <h2 className="text-lg font-medium text-[var(--foreground)] mb-4">Your switches</h2>
-          {switches && switches.length > 0 ? (
+        {/* Switches */}
+        {switches && switches.length > 0 && (
+          <section className="mb-14">
+            <h2 className="text-xs font-medium tracking-widest uppercase text-white/30 mb-5">
+              Your switches
+            </h2>
             <ul className="flex flex-col gap-3">
               {switches.map((sw) => (
                 <li
                   key={sw.id}
-                  className="rounded-lg border border-[var(--foreground)]/10 p-4"
+                  className="rounded-xl border border-white/8 bg-white/[0.03] px-6 py-5"
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-[var(--foreground)]">{sw.name}</span>
-                    <div className="flex items-center gap-2">
+                  {/* Header row */}
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-base font-medium text-white/85">
+                        {sw.name}
+                      </span>
                       <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${
+                        className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${
                           sw.is_active
-                            ? 'bg-green-500/10 text-green-500'
-                            : 'bg-[var(--foreground)]/10 text-[var(--foreground)]/40'
+                            ? 'bg-emerald-500/10 text-emerald-400'
+                            : 'bg-white/5 text-white/30'
                         }`}
                       >
                         {sw.is_active ? 'Active' : 'Inactive'}
                       </span>
-                      <CheckInButton switchId={sw.id} />
                     </div>
+                    <CheckInButton switchId={sw.id} />
                   </div>
-                  <p className="text-sm text-[var(--foreground)]/60">{sw.contact_email}</p>
-                  <p className="text-sm text-[var(--foreground)]/60">
-                    Check-in: {sw.check_in_time}
-                  </p>
-                  <p className="text-sm text-[var(--foreground)]/60">
-                    Grace period: {sw.grace_period_minutes} min
-                  </p>
-                  <p className="text-sm text-[var(--foreground)]/60">
-                    Last check-in:{' '}
-                    {lastCheckin[sw.id]
-                      ? new Date(lastCheckin[sw.id]).toLocaleString()
-                      : 'Never'}
-                  </p>
+
+                  {/* Details grid */}
+                  <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-3">
+                    <div>
+                      <dt className="text-[11px] text-white/30 mb-0.5">Contact</dt>
+                      <dd className="text-sm text-white/60 truncate">{sw.contact_email}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-[11px] text-white/30 mb-0.5">Check-in time</dt>
+                      <dd className="text-sm text-white/60">{sw.check_in_time} UTC</dd>
+                    </div>
+                    <div>
+                      <dt className="text-[11px] text-white/30 mb-0.5">Grace period</dt>
+                      <dd className="text-sm text-white/60">{sw.grace_period_minutes} min</dd>
+                    </div>
+                    <div>
+                      <dt className="text-[11px] text-white/30 mb-0.5">Last check-in</dt>
+                      <dd className="text-sm text-white/60">
+                        {lastCheckin[sw.id]
+                          ? new Date(lastCheckin[sw.id]).toLocaleString()
+                          : 'Never'}
+                      </dd>
+                    </div>
+                  </dl>
                 </li>
               ))}
             </ul>
-          ) : (
-            <p className="text-sm text-[var(--foreground)]/40">No switches yet.</p>
-          )}
-        </div>
+          </section>
+        )}
+
+        {/* Create form */}
+        <section>
+          <h2 className="text-xs font-medium tracking-widest uppercase text-white/30 mb-5">
+            {switches && switches.length > 0 ? 'Add a switch' : 'Create your first switch'}
+          </h2>
+          <CreateSwitchForm />
+        </section>
       </div>
     </div>
   )
