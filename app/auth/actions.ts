@@ -50,3 +50,19 @@ export async function logout() {
   revalidatePath('/', 'layout')
   redirect('/login')
 }
+
+export async function forgotPassword(
+  _prevState: AuthState,
+  formData: FormData
+): Promise<{ error: string | null; sent: boolean }> {
+  const supabase = await createClient()
+
+  const { error } = await supabase.auth.resetPasswordForEmail(
+    formData.get('email') as string,
+    { redirectTo: 'https://getvigilis.com/reset-password' }
+  )
+
+  // Don't reveal whether the address exists — always show the sent state.
+  if (error) return { error: error.message, sent: false }
+  return { error: null, sent: true }
+}

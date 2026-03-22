@@ -30,9 +30,17 @@ export default function LoginPage() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="password" className="text-sm text-[var(--foreground)]">
-              Password
-            </label>
+            <div className="flex items-center justify-between">
+              <label htmlFor="password" className="text-sm text-[var(--foreground)]">
+                Password
+              </label>
+              <Link
+                href="/forgot-password"
+                className="text-xs text-[var(--foreground)]/50 hover:text-[var(--foreground)]/80 transition-colors"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <input
               id="password"
               name="password"
