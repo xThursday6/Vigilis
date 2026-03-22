@@ -42,11 +42,13 @@ export async function createSwitch(
   const gracePeriod = parseInt(formData.get('grace_period_minutes') as string, 10)
 
   const personalMessage = (formData.get('personal_message') as string).trim()
+  const contactName = (formData.get('contact_name') as string).trim()
 
   const { error } = await supabase.from('switches').insert({
     user_id: user.id,
     name: formData.get('name') as string,
     contact_email: formData.get('contact_email') as string,
+    contact_name: contactName || null,
     check_in_time: formData.get('check_in_time') as string,
     grace_period_minutes: isNaN(gracePeriod) ? 60 : gracePeriod,
     personal_message: personalMessage || null,
@@ -73,12 +75,14 @@ export async function updateSwitch(formData: FormData): Promise<Result> {
   const gracePeriod = parseInt(formData.get('grace_period_minutes') as string, 10)
 
   const personalMessage = (formData.get('personal_message') as string).trim()
+  const contactName = (formData.get('contact_name') as string).trim()
 
   const { error } = await supabase
     .from('switches')
     .update({
       name: formData.get('name') as string,
       contact_email: formData.get('contact_email') as string,
+      contact_name: contactName || null,
       check_in_time: formData.get('check_in_time') as string,
       grace_period_minutes: isNaN(gracePeriod) ? 60 : gracePeriod,
       personal_message: personalMessage || null,

@@ -9,6 +9,7 @@ type Switch = {
   id: string
   name: string
   contact_email: string
+  contact_name: string | null
   check_in_time: string
   grace_period_minutes: number
   is_active: boolean
@@ -208,6 +209,23 @@ export default function SwitchCard({ sw, lastCheckin, onDeleted }: Props) {
                 defaultValue={sw.contact_email}
                 className={inputClass}
               />
+            </div>
+
+            <div className="flex flex-col gap-1.5 sm:col-span-2">
+              <label className={labelClass}>
+                Contact&apos;s name{' '}
+                <span className="text-white/20">(optional)</span>
+              </label>
+              <input
+                name="contact_name"
+                type="text"
+                placeholder="e.g. Sarah"
+                defaultValue={sw.contact_name ?? ''}
+                className={inputClass}
+              />
+              <p className="text-[11px] text-white/25">
+                Used to personalise the alert email they receive.
+              </p>
             </div>
             <div className="flex flex-col gap-1.5">
               <label className={labelClass}>Check-in time (UTC)</label>

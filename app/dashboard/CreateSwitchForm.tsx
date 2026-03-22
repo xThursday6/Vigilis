@@ -48,6 +48,23 @@ export default function CreateSwitchForm() {
             />
           </div>
 
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
+            <label htmlFor="contact_name" className={labelClass}>
+              Contact&apos;s name{' '}
+              <span className="text-white/20">(optional)</span>
+            </label>
+            <input
+              id="contact_name"
+              name="contact_name"
+              type="text"
+              placeholder="e.g. Sarah"
+              className={inputClass}
+            />
+            <p className="text-[11px] text-white/25">
+              Used to personalise the alert email they receive.
+            </p>
+          </div>
+
           <div className="flex flex-col gap-1.5">
             <label htmlFor="check_in_time" className={labelClass}>
               Check-in time (UTC)

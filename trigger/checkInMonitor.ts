@@ -92,6 +92,9 @@ export const checkInMonitor = schedules.task({
           ? `${Math.floor(overdueMinutes / 60)}h ${overdueMinutes % 60}m`
           : `${overdueMinutes} minutes`;
 
+      // Personalise greeting with contact name if available
+      const greeting = sw.contact_name ? `Hi ${sw.contact_name},` : 'Hi,'
+
       // Build the closing paragraph: personal message if set, default otherwise
       const closingParagraph = sw.personal_message
         ? `<p><em>${sw.personal_message}</em></p>`
@@ -103,7 +106,7 @@ export const checkInMonitor = schedules.task({
         to: sw.contact_email,
         subject: `A heads-up about ${sw.name}`,
         html: `
-          <p>Hi,</p>
+          <p>${greeting}</p>
           <p>
             This is a quiet note from Vigilis. <strong>${sw.name}</strong> was
             due to check in by ${sw.check_in_time} UTC today, and the
