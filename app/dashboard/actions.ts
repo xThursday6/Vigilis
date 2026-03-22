@@ -41,12 +41,15 @@ export async function createSwitch(
 
   const gracePeriod = parseInt(formData.get('grace_period_minutes') as string, 10)
 
+  const personalMessage = (formData.get('personal_message') as string).trim()
+
   const { error } = await supabase.from('switches').insert({
     user_id: user.id,
     name: formData.get('name') as string,
     contact_email: formData.get('contact_email') as string,
     check_in_time: formData.get('check_in_time') as string,
     grace_period_minutes: isNaN(gracePeriod) ? 60 : gracePeriod,
+    personal_message: personalMessage || null,
     is_active: true,
   })
 
@@ -69,6 +72,8 @@ export async function updateSwitch(formData: FormData): Promise<Result> {
   const switchId = formData.get('switch_id') as string
   const gracePeriod = parseInt(formData.get('grace_period_minutes') as string, 10)
 
+  const personalMessage = (formData.get('personal_message') as string).trim()
+
   const { error } = await supabase
     .from('switches')
     .update({
@@ -76,6 +81,7 @@ export async function updateSwitch(formData: FormData): Promise<Result> {
       contact_email: formData.get('contact_email') as string,
       check_in_time: formData.get('check_in_time') as string,
       grace_period_minutes: isNaN(gracePeriod) ? 60 : gracePeriod,
+      personal_message: personalMessage || null,
     })
     .eq('id', switchId)
     .eq('user_id', user.id) // owner check
@@ -88,20 +94,33 @@ export async function updateSwitch(formData: FormData): Promise<Result> {
 
 // ── Delete switch ─────────────────────────────────────────────────────────────
 
-export async function deleteSwitch(switchId: string): Promise<void> {
+export async function deleteSwitch(switchId: string): Promise<Result> {
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) return
+  if (!user) return { error: 'Unauthorized' }
 
   // Remove check-ins first (FK constraint), then the switch itself.
   // The .eq('user_id') on the switch delete acts as an ownership guard.
-  await supabase.from('checkins').delete().eq('switch_id', switchId)
-  await supabase.from('switches').delete().eq('id', switchId).eq('user_id', user.id)
+  const { error: checkinError } = await supabase
+    .from('checkins')
+    .delete()
+    .eq('switch_id', switchId)
+
+  if (checkinError) return { error: checkinError.message }
+
+  const { error: switchError } = await supabase
+    .from('switches')
+    .delete()
+    .eq('id', switchId)
+    .eq('user_id', user.id)
+
+  if (switchError) return { error: switchError.message }
 
   revalidatePath('/dashboard')
+  return { error: null }
 }
 
 // ── Send test alert ───────────────────────────────────────────────────────────

@@ -12,6 +12,7 @@ type Switch = {
   check_in_time: string
   grace_period_minutes: number
   is_active: boolean
+  personal_message: string | null
 }
 
 type Props = {
@@ -29,13 +30,23 @@ export default function SwitchCard({ sw, lastCheckin }: Props) {
   const [isPending, startTransition] = useTransition()
   const [mode, setMode] = useState<'view' | 'edit' | 'delete-confirm'>('view')
   const [editError, setEditError] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [testState, setTestState] = useState<'idle' | 'sent' | 'error'>('idle')
   const [testError, setTestError] = useState<string | null>(null)
 
   function handleDelete() {
+    setIsDeleting(true)
+    setDeleteError(null)
     startTransition(async () => {
-      await deleteSwitch(sw.id)
+      const result = await deleteSwitch(sw.id)
+      if (result.error) {
+        setDeleteError(result.error)
+        setIsDeleting(false)
+        return
+      }
       router.refresh()
+      // isDeleting stays true — component unmounts once refresh completes
     })
   }
 
@@ -154,19 +165,22 @@ export default function SwitchCard({ sw, lastCheckin }: Props) {
           <div className="flex items-center gap-4">
             <button
               onClick={handleDelete}
-              disabled={isPending}
+              disabled={isDeleting}
               className="text-sm text-red-400 hover:text-red-300 disabled:opacity-40 transition-colors"
             >
-              {isPending ? 'Deleting…' : 'Yes, delete it'}
+              {isDeleting ? 'Deleting…' : 'Yes, delete it'}
             </button>
             <button
-              onClick={() => setMode('view')}
-              disabled={isPending}
+              onClick={() => { setMode('view'); setDeleteError(null) }}
+              disabled={isDeleting}
               className="text-sm text-white/40 hover:text-white/70 disabled:opacity-40 transition-colors"
             >
               Cancel
             </button>
           </div>
+          {deleteError && (
+            <p className="text-sm text-red-400 mt-3">{deleteError}</p>
+          )}
         </div>
       )}
 
@@ -215,6 +229,32 @@ export default function SwitchCard({ sw, lastCheckin }: Props) {
                 className={inputClass}
               />
             </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className={labelClass}>
+              Personal message{' '}
+              <span className="text-white/20">(optional)</span>
+            </label>
+            <textarea
+              name="personal_message"
+              rows={3}
+              defaultValue={sw.personal_message ?? ''}
+              placeholder="Leave a message for your contact…"
+              className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white/80 placeholder:text-white/20 focus:border-white/30 focus:outline-none transition-colors resize-none"
+            />
+            <ul className="flex flex-col gap-1 mt-0.5">
+              {[
+                "If you don't hear from me, please try calling.",
+                "I'm traveling alone — if this arrives, please check on me.",
+                'Nothing dramatic, just give me a call if you get this.',
+                "I'm okay most days. If this reached you, today might be different.",
+              ].map((hint) => (
+                <li key={hint} className="text-[11px] text-white/20 leading-relaxed">
+                  &ldquo;{hint}&rdquo;
+                </li>
+              ))}
+            </ul>
           </div>
 
           {editError && <p className="text-sm text-red-400 mb-3">{editError}</p>}

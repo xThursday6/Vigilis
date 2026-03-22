@@ -92,6 +92,11 @@ export const checkInMonitor = schedules.task({
           ? `${Math.floor(overdueMinutes / 60)}h ${overdueMinutes % 60}m`
           : `${overdueMinutes} minutes`;
 
+      // Build the closing paragraph: personal message if set, default otherwise
+      const closingParagraph = sw.personal_message
+        ? `<p><em>${sw.personal_message}</em></p>`
+        : `<p>This is just a heads-up, not an alarm. It may well be nothing. But if you haven't heard from ${sw.name} recently, it might be worth a quick message or call.</p>`
+
       // Send a calm alert to the trusted contact
       const { error: emailError } = await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL ?? "Vigilis <alerts@vigilis.app>",
@@ -105,11 +110,7 @@ export const checkInMonitor = schedules.task({
             ${sw.grace_period_minutes}-minute grace period has now passed
             — about ${overdueText} ago.
           </p>
-          <p>
-            This is just a heads-up, not an alarm. It may well be nothing.
-            But if you haven't heard from ${sw.name} recently, it might be worth
-            a quick message or call.
-          </p>
+          ${closingParagraph}
           <p>— Vigilis</p>
         `,
       });

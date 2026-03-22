@@ -77,6 +77,32 @@ export default function CreateSwitchForm() {
           </div>
         </div>
 
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="personal_message" className={labelClass}>
+            Personal message{' '}
+            <span className="text-white/20">(optional)</span>
+          </label>
+          <textarea
+            id="personal_message"
+            name="personal_message"
+            rows={3}
+            placeholder="Leave a message for your contact…"
+            className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white/80 placeholder:text-white/20 focus:border-white/30 focus:outline-none transition-colors resize-none"
+          />
+          <ul className="flex flex-col gap-1 mt-0.5">
+            {[
+              'If you don\'t hear from me, please try calling.',
+              'I\'m traveling alone — if this arrives, please check on me.',
+              'Nothing dramatic, just give me a call if you get this.',
+              'I\'m okay most days. If this reached you, today might be different.',
+            ].map((hint) => (
+              <li key={hint} className="text-[11px] text-white/20 leading-relaxed">
+                &ldquo;{hint}&rdquo;
+              </li>
+            ))}
+          </ul>
+        </div>
+
         {state.error && (
           <p className="text-sm text-red-400">{state.error}</p>
         )}
