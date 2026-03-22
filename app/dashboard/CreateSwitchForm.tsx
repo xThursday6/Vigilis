@@ -19,16 +19,19 @@ export default function CreateSwitchForm() {
         <div className="grid sm:grid-cols-2 gap-5">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="name" className={labelClass}>
-              Name
+              Your name
             </label>
             <input
               id="name"
               name="name"
               type="text"
               required
-              placeholder="e.g. Daily check-in"
+              placeholder="e.g. Alex Johnson"
               className={inputClass}
             />
+            <p className="text-[11px] text-white/25">
+              This is the name your contact will see in any alert they receive.
+            </p>
           </div>
 
           <div className="flex flex-col gap-1.5">

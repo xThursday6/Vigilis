@@ -100,14 +100,14 @@ export const checkInMonitor = schedules.task({
         html: `
           <p>Hi,</p>
           <p>
-            This is a quiet note from Vigilis. The daily check-in for
-            <strong>${sw.name}</strong> was due at ${sw.check_in_time} UTC today,
-            and the ${sw.grace_period_minutes}-minute grace period has now passed
+            This is a quiet note from Vigilis. <strong>${sw.name}</strong> was
+            due to check in by ${sw.check_in_time} UTC today, and the
+            ${sw.grace_period_minutes}-minute grace period has now passed
             — about ${overdueText} ago.
           </p>
           <p>
             This is just a heads-up, not an alarm. It may well be nothing.
-            But if you haven't heard from them recently, it might be worth
+            But if you haven't heard from ${sw.name} recently, it might be worth
             a quick message or call.
           </p>
           <p>— Vigilis</p>
