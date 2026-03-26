@@ -9,6 +9,7 @@ type Switch = {
   contact_name: string | null
   check_in_time: string
   grace_period_minutes: number
+  interval_hours: number
   is_active: boolean
   personal_message: string | null
 }

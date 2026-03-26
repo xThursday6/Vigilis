@@ -16,7 +16,6 @@ export const dailyReminder = schedules.task({
   maxDuration: 120,
   run: async (payload) => {
     const now = payload.timestamp;
-    const todayStr = now.toISOString().split("T")[0]; // YYYY-MM-DD in UTC
 
     const { data: switches, error } = await supabase
       .from("switches")
@@ -56,16 +55,18 @@ export const dailyReminder = schedules.task({
         continue;
       }
 
-      // Filter down to switches the user hasn't checked in on yet today
-      const todayStart = new Date(`${todayStr}T00:00:00.000Z`);
+      // Filter to switches with no check-in within their interval window
       const pendingSwitches: typeof switches = [];
 
       for (const sw of userSwitches) {
+        const intervalHours = Number(sw.interval_hours) || 24;
+        const windowStart = new Date(now.getTime() - intervalHours * 60 * 60 * 1000);
+
         const { data: checkins } = await supabase
           .from("checkins")
           .select("checked_in_at")
           .eq("switch_id", sw.id)
-          .gte("checked_in_at", todayStart.toISOString())
+          .gte("checked_in_at", windowStart.toISOString())
           .limit(1);
 
         if (!checkins || checkins.length === 0) {

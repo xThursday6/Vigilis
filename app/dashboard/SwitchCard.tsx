@@ -12,6 +12,7 @@ type Switch = {
   contact_name: string | null
   check_in_time: string
   grace_period_minutes: number
+  interval_hours: number
   is_active: boolean
   personal_message: string | null
 }
@@ -103,6 +104,10 @@ export default function SwitchCard({ sw, lastCheckin }: Props) {
             <div>
               <dt className="text-[11px] text-white/30 mb-0.5">Contact</dt>
               <dd className="text-sm text-white/60 truncate">{sw.contact_email}</dd>
+            </div>
+            <div>
+              <dt className="text-[11px] text-white/30 mb-0.5">Interval</dt>
+              <dd className="text-sm text-white/60">Every {sw.interval_hours}h</dd>
             </div>
             <div>
               <dt className="text-[11px] text-white/30 mb-0.5">Check-in time</dt>
@@ -214,6 +219,18 @@ export default function SwitchCard({ sw, lastCheckin }: Props) {
               <p className="text-[11px] text-white/25">
                 Used to personalise the alert email they receive.
               </p>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className={labelClass}>Check-in interval</label>
+              <select
+                name="interval_hours"
+                defaultValue={sw.interval_hours}
+                className={inputClass}
+              >
+                <option value={24}>Every 24 hours</option>
+                <option value={48}>Every 48 hours</option>
+                <option value={72}>Every 72 hours</option>
+              </select>
             </div>
             <div className="flex flex-col gap-1.5">
               <label className={labelClass}>Check-in time (UTC)</label>

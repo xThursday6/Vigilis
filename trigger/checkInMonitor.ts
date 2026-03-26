@@ -15,7 +15,6 @@ export const checkInMonitor = schedules.task({
   maxDuration: 120,
   run: async (payload) => {
     const now = payload.timestamp;
-    const todayStr = now.toISOString().split("T")[0]; // YYYY-MM-DD in UTC
 
     const { data: switches, error } = await supabase
       .from("switches")
@@ -59,28 +58,28 @@ export const checkInMonitor = schedules.task({
         continue;
       }
 
-      // Already sent an alert today — don't repeat
+      // Already alerted within this interval window — don't repeat
+      const intervalHours = Number(sw.interval_hours) || 24;
+      const intervalMs = intervalHours * 60 * 60 * 1000;
       if (sw.last_alert_sent_at) {
-        const lastAlertDay = new Date(sw.last_alert_sent_at)
-          .toISOString()
-          .split("T")[0];
-        if (lastAlertDay === todayStr) {
-          logger.log(`Switch "${sw.name}": alert already sent today`);
+        const lastAlert = new Date(sw.last_alert_sent_at);
+        if (now.getTime() - lastAlert.getTime() < intervalMs) {
+          logger.log(`Switch "${sw.name}": alert already sent within interval`);
           continue;
         }
       }
 
-      // Check whether the user has checked in at any point today
-      const todayStart = new Date(`${todayStr}T00:00:00.000Z`);
+      // Check whether the user has checked in within the interval window
+      const windowStart = new Date(now.getTime() - intervalMs);
       const { data: recentCheckins } = await supabase
         .from("checkins")
         .select("checked_in_at")
         .eq("switch_id", sw.id)
-        .gte("checked_in_at", todayStart.toISOString())
+        .gte("checked_in_at", windowStart.toISOString())
         .limit(1);
 
       if (recentCheckins && recentCheckins.length > 0) {
-        logger.log(`Switch "${sw.name}": check-in confirmed today`);
+        logger.log(`Switch "${sw.name}": check-in found within interval`);
         continue;
       }
 

@@ -66,6 +66,22 @@ export default function CreateSwitchForm() {
           </div>
 
           <div className="flex flex-col gap-1.5">
+            <label htmlFor="interval_hours" className={labelClass}>
+              Check-in interval
+            </label>
+            <select
+              id="interval_hours"
+              name="interval_hours"
+              defaultValue={24}
+              className={inputClass}
+            >
+              <option value={24}>Every 24 hours</option>
+              <option value={48}>Every 48 hours</option>
+              <option value={72}>Every 72 hours</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
             <label htmlFor="check_in_time" className={labelClass}>
               Check-in time (UTC)
             </label>

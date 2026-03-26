@@ -40,6 +40,7 @@ export async function createSwitch(
   if (!user) return { error: 'Unauthorized' }
 
   const gracePeriod = parseInt(formData.get('grace_period_minutes') as string, 10)
+  const intervalHours = parseInt(formData.get('interval_hours') as string, 10)
 
   const personalMessage = (formData.get('personal_message') as string).trim()
   const contactName = (formData.get('contact_name') as string).trim()
@@ -51,6 +52,7 @@ export async function createSwitch(
     contact_name: contactName || null,
     check_in_time: formData.get('check_in_time') as string,
     grace_period_minutes: isNaN(gracePeriod) ? 60 : gracePeriod,
+    interval_hours: isNaN(intervalHours) ? 24 : intervalHours,
     personal_message: personalMessage || null,
     is_active: true,
   })
@@ -73,6 +75,7 @@ export async function updateSwitch(formData: FormData): Promise<Result> {
 
   const switchId = formData.get('switch_id') as string
   const gracePeriod = parseInt(formData.get('grace_period_minutes') as string, 10)
+  const intervalHours = parseInt(formData.get('interval_hours') as string, 10)
 
   const personalMessage = (formData.get('personal_message') as string).trim()
   const contactName = (formData.get('contact_name') as string).trim()
@@ -85,6 +88,7 @@ export async function updateSwitch(formData: FormData): Promise<Result> {
       contact_name: contactName || null,
       check_in_time: formData.get('check_in_time') as string,
       grace_period_minutes: isNaN(gracePeriod) ? 60 : gracePeriod,
+      interval_hours: isNaN(intervalHours) ? 24 : intervalHours,
       personal_message: personalMessage || null,
     })
     .eq('id', switchId)
