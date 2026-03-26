@@ -6,18 +6,16 @@ import { changePassword } from './actions'
 const initialState = { error: null, success: false }
 
 const inputClass =
-  'w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white/80 placeholder:text-white/20 focus:border-white/30 focus:outline-none transition-colors'
+  'w-full rounded-lg border border-[#deded6] bg-white px-3 py-2.5 text-sm text-[#1a1a17] placeholder:text-[#c0c0b4] focus:border-[#b0b0a4] focus:outline-none transition-colors'
 
-const labelClass = 'text-[11px] text-white/30'
+const labelClass = 'text-xs font-medium text-[#6b6b5e]'
 
 export default function ChangePasswordForm() {
   const [state, formAction, isPending] = useActionState(changePassword, initialState)
 
   if (state.success) {
     return (
-      <p className="text-sm text-white/60">
-        Your password has been updated.
-      </p>
+      <p className="text-sm text-[#6b6b5e]">Your password has been updated.</p>
     )
   }
 
@@ -54,13 +52,13 @@ export default function ChangePasswordForm() {
         </div>
       </div>
 
-      {state.error && <p className="text-sm text-red-400">{state.error}</p>}
+      {state.error && <p className="text-sm text-red-500">{state.error}</p>}
 
       <div>
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-white text-[#0e0e0e] px-5 py-2 text-sm font-medium hover:bg-white/90 disabled:opacity-40 transition-colors"
+          className="rounded-lg bg-[#1a1a17] text-[#f5f5f0] px-5 py-2.5 text-sm font-medium hover:bg-[#2e2e2a] disabled:opacity-40 transition-colors"
         >
           {isPending ? 'Updating…' : 'Update password'}
         </button>

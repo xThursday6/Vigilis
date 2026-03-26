@@ -23,9 +23,9 @@ type Props = {
 }
 
 const inputClass =
-  'w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white/80 placeholder:text-white/20 focus:border-white/30 focus:outline-none transition-colors'
+  'w-full rounded-lg border border-[#deded6] bg-white px-3 py-2.5 text-sm text-[#1a1a17] placeholder:text-[#c0c0b4] focus:border-[#b0b0a4] focus:outline-none transition-colors'
 
-const labelClass = 'text-[11px] text-white/30'
+const labelClass = 'text-[11px] font-medium text-[#9e9e92]'
 
 export default function SwitchCard({ sw, lastCheckin }: Props) {
   const router = useRouter()
@@ -79,16 +79,18 @@ export default function SwitchCard({ sw, lastCheckin }: Props) {
   }
 
   return (
-    <li className="rounded-xl border border-white/8 bg-white/[0.03] px-6 py-5">
+    <li className="rounded-2xl border border-[#e6e6df] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.05)] px-6 py-5">
       {/* Header row — always visible */}
-      <div className="flex items-start justify-between gap-4 mb-4">
+      <div className="flex items-start justify-between gap-4 mb-5">
         <div className="flex items-center gap-3 min-w-0">
-          <span className="text-base font-medium text-white/85 truncate">{sw.name}</span>
+          <span className="text-base font-semibold text-[#1a1a17] truncate tracking-tight">
+            {sw.name}
+          </span>
           <span
             className={`shrink-0 text-[11px] px-2 py-0.5 rounded-full font-medium ${
               sw.is_active
-                ? 'bg-emerald-500/10 text-emerald-400'
-                : 'bg-white/5 text-white/30'
+                ? 'bg-[#edfaf3] text-[#2d7a4f]'
+                : 'bg-[#f4f4f0] text-[#9e9e92]'
             }`}
           >
             {sw.is_active ? 'Active' : 'Inactive'}
@@ -100,50 +102,50 @@ export default function SwitchCard({ sw, lastCheckin }: Props) {
       {/* ── View mode ─────────────────────────────────────────────────── */}
       {mode === 'view' && (
         <>
-          <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-3 mb-5">
+          <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-4 mb-5">
             <div>
-              <dt className="text-[11px] text-white/30 mb-0.5">Contact</dt>
-              <dd className="text-sm text-white/60 truncate">{sw.contact_email}</dd>
+              <dt className="text-[11px] text-[#b0b0a4] mb-0.5">Contact</dt>
+              <dd className="text-sm text-[#6b6b5e] truncate">{sw.contact_email}</dd>
             </div>
             <div>
-              <dt className="text-[11px] text-white/30 mb-0.5">Interval</dt>
-              <dd className="text-sm text-white/60">Every {sw.interval_hours}h</dd>
+              <dt className="text-[11px] text-[#b0b0a4] mb-0.5">Interval</dt>
+              <dd className="text-sm text-[#6b6b5e]">Every {sw.interval_hours}h</dd>
             </div>
             <div>
-              <dt className="text-[11px] text-white/30 mb-0.5">Check-in time</dt>
-              <dd className="text-sm text-white/60">{sw.check_in_time} UTC</dd>
+              <dt className="text-[11px] text-[#b0b0a4] mb-0.5">Check-in time</dt>
+              <dd className="text-sm text-[#6b6b5e]">{sw.check_in_time} UTC</dd>
             </div>
             <div>
-              <dt className="text-[11px] text-white/30 mb-0.5">Grace period</dt>
-              <dd className="text-sm text-white/60">{sw.grace_period_minutes} min</dd>
+              <dt className="text-[11px] text-[#b0b0a4] mb-0.5">Grace period</dt>
+              <dd className="text-sm text-[#6b6b5e]">{sw.grace_period_minutes} min</dd>
             </div>
-            <div>
-              <dt className="text-[11px] text-white/30 mb-0.5">Last check-in</dt>
-              <dd className="text-sm text-white/60">
+            <div className="col-span-2 sm:col-span-4">
+              <dt className="text-[11px] text-[#b0b0a4] mb-0.5">Last check-in</dt>
+              <dd className="text-sm text-[#6b6b5e]">
                 {lastCheckin ? new Date(lastCheckin).toUTCString() : 'Never'}
               </dd>
             </div>
           </dl>
 
-          <div className="flex items-center gap-5 border-t border-white/5 pt-4">
+          <div className="flex items-center gap-5 border-t border-[#f0f0ea] pt-4">
             <button
               onClick={() => { setEditError(null); setMode('edit') }}
-              className="text-xs text-white/40 hover:text-white/70 transition-colors"
+              className="text-xs text-[#9e9e92] hover:text-[#1a1a17] transition-colors"
             >
               Edit
             </button>
             <button
               onClick={handleTest}
-              className="text-xs text-white/40 hover:text-white/70 transition-colors"
+              className="text-xs text-[#9e9e92] hover:text-[#1a1a17] transition-colors"
             >
               {testState === 'sent' ? 'Test sent ✓' : 'Test alert'}
             </button>
             {testState === 'error' && (
-              <span className="text-xs text-red-400">{testError}</span>
+              <span className="text-xs text-red-500">{testError}</span>
             )}
             <button
               onClick={() => setMode('delete-confirm')}
-              className="text-xs text-red-500/40 hover:text-red-400 transition-colors ml-auto"
+              className="text-xs text-red-400/60 hover:text-red-500 transition-colors ml-auto"
             >
               Delete
             </button>
@@ -153,8 +155,8 @@ export default function SwitchCard({ sw, lastCheckin }: Props) {
 
       {/* ── Delete confirmation ────────────────────────────────────────── */}
       {mode === 'delete-confirm' && (
-        <div className="border-t border-white/5 pt-4">
-          <p className="text-sm text-white/50 mb-4">
+        <div className="border-t border-[#f0f0ea] pt-4">
+          <p className="text-sm text-[#6b6b5e] mb-4">
             Are you sure? This will permanently delete this switch and all its
             check-in history. This cannot be undone.
           </p>
@@ -162,27 +164,27 @@ export default function SwitchCard({ sw, lastCheckin }: Props) {
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className="text-sm text-red-400 hover:text-red-300 disabled:opacity-40 transition-colors"
+              className="text-sm text-red-500 hover:text-red-600 disabled:opacity-40 transition-colors"
             >
               {deleting ? 'Deleting…' : 'Yes, delete it'}
             </button>
             <button
               onClick={() => { setMode('view'); setDeleteError(null) }}
               disabled={deleting}
-              className="text-sm text-white/40 hover:text-white/70 disabled:opacity-40 transition-colors"
+              className="text-sm text-[#9e9e92] hover:text-[#1a1a17] disabled:opacity-40 transition-colors"
             >
               Cancel
             </button>
           </div>
           {deleteError && (
-            <p className="text-sm text-red-400 mt-3">{deleteError}</p>
+            <p className="text-sm text-red-500 mt-3">{deleteError}</p>
           )}
         </div>
       )}
 
       {/* ── Edit mode ─────────────────────────────────────────────────── */}
       {mode === 'edit' && (
-        <form onSubmit={handleSave} className="border-t border-white/5 pt-4">
+        <form onSubmit={handleSave} className="border-t border-[#f0f0ea] pt-5">
           <div className="grid sm:grid-cols-2 gap-4 mb-4">
             <div className="flex flex-col gap-1.5">
               <label className={labelClass}>Your name</label>
@@ -207,7 +209,7 @@ export default function SwitchCard({ sw, lastCheckin }: Props) {
             <div className="flex flex-col gap-1.5 sm:col-span-2">
               <label className={labelClass}>
                 Contact&apos;s name{' '}
-                <span className="text-white/20">(optional)</span>
+                <span className="text-[#c0c0b4] font-normal">(optional)</span>
               </label>
               <input
                 name="contact_name"
@@ -216,7 +218,7 @@ export default function SwitchCard({ sw, lastCheckin }: Props) {
                 defaultValue={sw.contact_name ?? ''}
                 className={inputClass}
               />
-              <p className="text-[11px] text-white/25">
+              <p className="text-[11px] text-[#b0b0a4]">
                 Used to personalise the alert email they receive.
               </p>
             </div>
@@ -255,17 +257,17 @@ export default function SwitchCard({ sw, lastCheckin }: Props) {
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 mb-5">
             <label className={labelClass}>
               Personal message{' '}
-              <span className="text-white/20">(optional)</span>
+              <span className="text-[#c0c0b4] font-normal">(optional)</span>
             </label>
             <textarea
               name="personal_message"
               rows={3}
               defaultValue={sw.personal_message ?? ''}
               placeholder="Leave a message for your contact…"
-              className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white/80 placeholder:text-white/20 focus:border-white/30 focus:outline-none transition-colors resize-none"
+              className="w-full rounded-lg border border-[#deded6] bg-white px-3 py-2.5 text-sm text-[#1a1a17] placeholder:text-[#c0c0b4] focus:border-[#b0b0a4] focus:outline-none transition-colors resize-none"
             />
             <ul className="flex flex-col gap-1 mt-0.5">
               {[
@@ -274,20 +276,20 @@ export default function SwitchCard({ sw, lastCheckin }: Props) {
                 'Nothing dramatic, just give me a call if you get this.',
                 "I'm okay most days. If this reached you, today might be different.",
               ].map((hint) => (
-                <li key={hint} className="text-[11px] text-white/20 leading-relaxed">
+                <li key={hint} className="text-[11px] text-[#c0c0b4] leading-relaxed">
                   &ldquo;{hint}&rdquo;
                 </li>
               ))}
             </ul>
           </div>
 
-          {editError && <p className="text-sm text-red-400 mb-3">{editError}</p>}
+          {editError && <p className="text-sm text-red-500 mb-3">{editError}</p>}
 
-          <div className="flex items-center gap-4 mt-4">
+          <div className="flex items-center gap-4">
             <button
               type="submit"
               disabled={saving}
-              className="text-sm text-white/80 hover:text-white disabled:opacity-40 transition-colors"
+              className="text-sm font-medium text-[#1a1a17] hover:text-[#2e2e2a] disabled:opacity-40 transition-colors"
             >
               {saving ? 'Saving…' : 'Save changes'}
             </button>
@@ -295,7 +297,7 @@ export default function SwitchCard({ sw, lastCheckin }: Props) {
               type="button"
               onClick={() => { setMode('view'); setEditError(null) }}
               disabled={saving}
-              className="text-sm text-white/40 hover:text-white/70 disabled:opacity-40 transition-colors"
+              className="text-sm text-[#9e9e92] hover:text-[#1a1a17] disabled:opacity-40 transition-colors"
             >
               Cancel
             </button>

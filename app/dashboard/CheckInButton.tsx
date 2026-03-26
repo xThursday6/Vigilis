@@ -17,7 +17,7 @@ export default function CheckInButton({ switchId }: { switchId: string }) {
           router.refresh()
         })
       }
-      className="shrink-0 rounded-lg border border-emerald-500/30 px-3 py-1.5 text-xs font-medium text-emerald-400 hover:bg-emerald-500/10 disabled:opacity-40 transition-colors"
+      className="shrink-0 rounded-lg bg-[#f0faf4] border border-[#c6eed6] px-3.5 py-1.5 text-xs font-medium text-[#2d7a4f] hover:bg-[#e4f7ec] disabled:opacity-40 transition-colors"
     >
       {isPending ? 'Checking in…' : 'Check in'}
     </button>

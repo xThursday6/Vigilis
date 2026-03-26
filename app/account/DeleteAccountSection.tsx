@@ -17,8 +17,8 @@ export default function DeleteAccountSection() {
 
   return (
     <div>
-      <p className="text-sm text-white/50 mb-1">Delete account</p>
-      <p className="text-xs text-white/30 mb-5">
+      <p className="text-sm font-medium text-[#1a1a17] mb-1">Delete account</p>
+      <p className="text-xs text-[#9e9e92] mb-5">
         Permanently removes your account and all switches and check-in history.
         This cannot be undone.
       </p>
@@ -26,32 +26,32 @@ export default function DeleteAccountSection() {
       {!confirmed ? (
         <button
           onClick={() => setConfirmed(true)}
-          className="text-sm text-red-500/60 hover:text-red-400 transition-colors"
+          className="text-sm text-red-400 hover:text-red-500 transition-colors"
         >
           Delete my account
         </button>
       ) : (
         <div>
-          <p className="text-sm text-white/60 mb-4">
+          <p className="text-sm text-[#6b6b5e] mb-4">
             Are you sure? This will immediately and permanently delete everything.
           </p>
           <div className="flex items-center gap-4">
             <button
               onClick={handleDelete}
               disabled={isPending}
-              className="text-sm text-red-400 hover:text-red-300 disabled:opacity-40 transition-colors"
+              className="text-sm text-red-500 hover:text-red-600 disabled:opacity-40 transition-colors"
             >
               {isPending ? 'Deleting…' : 'Yes, delete everything'}
             </button>
             <button
               onClick={() => { setConfirmed(false); setError(null) }}
               disabled={isPending}
-              className="text-sm text-white/40 hover:text-white/70 disabled:opacity-40 transition-colors"
+              className="text-sm text-[#9e9e92] hover:text-[#1a1a17] disabled:opacity-40 transition-colors"
             >
               Cancel
             </button>
           </div>
-          {error && <p className="text-sm text-red-400 mt-3">{error}</p>}
+          {error && <p className="text-sm text-red-500 mt-3">{error}</p>}
         </div>
       )}
     </div>
