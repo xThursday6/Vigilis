@@ -106,16 +106,12 @@ export async function deleteSwitch(switchId: string): Promise<Result> {
 
   if (!user) return { error: 'Unauthorized' }
 
-  console.log('[deleteSwitch] user:', user.id, '| switch:', switchId)
-
   // Remove check-ins first (FK constraint), then the switch itself.
   // The .eq('user_id') on the switch delete acts as an ownership guard.
   const { error: checkinError } = await supabase
     .from('checkins')
     .delete()
     .eq('switch_id', switchId)
-
-  console.log('[deleteSwitch] checkins delete error:', checkinError ?? 'none')
 
   if (checkinError) return { error: checkinError.message }
 
@@ -125,18 +121,9 @@ export async function deleteSwitch(switchId: string): Promise<Result> {
     .eq('id', switchId)
     .eq('user_id', user.id)
 
-  console.log('[deleteSwitch] switch delete error:', switchError ?? 'none')
-
-  // Verify the row is actually gone
-  const { data: remaining, error: countError } = await supabase
-    .from('switches')
-    .select('id')
-    .eq('id', switchId)
-
-  console.log('[deleteSwitch] rows remaining after delete:', remaining?.length ?? 'query error', countError ?? '')
+  if (switchError) return { error: switchError.message }
 
   revalidatePath('/dashboard')
-  console.log('[deleteSwitch] done')
   return { error: null }
 }
 
@@ -179,6 +166,6 @@ export async function sendTestAlert(switchId: string): Promise<Result> {
     `,
   })
 
-  if (error) return { error: (error as Error).message }
+  if (error) return { error: error.message }
   return { error: null }
 }

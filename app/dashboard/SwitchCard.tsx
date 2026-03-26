@@ -37,7 +37,6 @@ export default function SwitchCard({ sw, lastCheckin }: Props) {
   const [testError, setTestError] = useState<string | null>(null)
 
   async function handleDelete() {
-    console.log('delete button clicked', sw.id)
     setDeleting(true)
     setDeleteError(null)
     const result = await deleteSwitch(sw.id)
