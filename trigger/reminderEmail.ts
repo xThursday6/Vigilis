@@ -1,6 +1,7 @@
 import { logger, schedules } from "@trigger.dev/sdk/v3";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
+import { randomBytes } from "crypto";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -77,13 +78,52 @@ export const dailyReminder = schedules.task({
         continue;
       }
 
-      const switchList = pendingSwitches
-        .map(
-          (sw) =>
-            `<li><strong>${sw.name}</strong> — by ${sw.check_in_time} UTC` +
-            ` (+ ${sw.grace_period_minutes} min grace)</li>`
-        )
-        .join("");
+      // Generate a one-click check-in token for each pending switch.
+      // Tokens expire 24 hours from now.
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://getvigilis.com";
+      const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+      const switchItems: string[] = [];
+
+      for (const sw of pendingSwitches) {
+        const token = randomBytes(32).toString("hex");
+
+        const { error: tokenError } = await supabase
+          .from("checkin_tokens")
+          .insert({
+            switch_id: sw.id,
+            user_id: userId,
+            token,
+            expires_at: expiresAt.toISOString(),
+          });
+
+        if (tokenError) {
+          logger.warn(`Failed to create token for switch "${sw.name}": ${tokenError.message}`);
+          // Fall back to a plain list item with no button
+          switchItems.push(
+            `<li style="margin-bottom:16px">
+              <strong>${sw.name}</strong> — by ${sw.check_in_time} UTC
+              (+ ${sw.grace_period_minutes} min grace)
+            </li>`
+          );
+          continue;
+        }
+
+        const checkinUrl = `${baseUrl}/api/checkin?token=${token}`;
+
+        switchItems.push(
+          `<li style="margin-bottom:16px">
+            <strong>${sw.name}</strong> — by ${sw.check_in_time} UTC
+            (+ ${sw.grace_period_minutes} min grace)<br/>
+            <a href="${checkinUrl}"
+               style="display:inline-block;margin-top:8px;padding:8px 18px;background:#ffffff;color:#0e0e0e;font-size:13px;font-weight:500;border-radius:6px;text-decoration:none;">
+              I'm okay ✓
+            </a>
+          </li>`
+        );
+      }
+
+      const switchList = switchItems.join("");
 
       const subject =
         pendingSwitches.length === 1
@@ -103,10 +143,10 @@ export const dailyReminder = schedules.task({
                 : `${pendingSwitches.length} of your switches need check-ins today`
             }:
           </p>
-          <ul>${switchList}</ul>
-          <p>
-            Head over to Vigilis and tap check-in whenever you're ready.
-            No rush — you've got until the deadline above.
+          <ul style="padding-left:0;list-style:none">${switchList}</ul>
+          <p style="color:#888;font-size:13px">
+            Clicking "I'm okay" checks you in instantly — no login needed.
+            Each link works once and expires after 24 hours.
           </p>
           <p>— Vigilis</p>
         `,
