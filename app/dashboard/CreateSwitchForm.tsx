@@ -1,16 +1,28 @@
 'use client'
 
 import { useActionState } from 'react'
+import Link from 'next/link'
+import type { PlanLimits } from '@/utils/subscription'
 import { createSwitch } from './actions'
 
 const initialState = { error: null }
 
 const inputClass =
-  'w-full rounded-lg border border-[#deded6] bg-white px-3 py-2.5 text-sm text-[#1a1a17] placeholder:text-[#c0c0b4] focus:border-[#b0b0a4] focus:outline-none transition-colors'
+  'w-full rounded-lg border border-[#deded6] bg-white px-3 py-2.5 text-sm text-[#1a1a17] placeholder:text-[#c0c0b4] focus:border-[#b0b0a4] focus:outline-none transition-colors disabled:bg-[#f7f7f2] disabled:text-[#b0b0a4]'
 
 const labelClass = 'text-xs font-medium text-[#6b6b5e]'
 
-export default function CreateSwitchForm() {
+function formatGrace(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`
+  const hours = minutes / 60
+  return Number.isInteger(hours) ? `${hours}h` : `${hours.toFixed(1)}h`
+}
+
+type Props = {
+  limits: PlanLimits
+}
+
+export default function CreateSwitchForm({ limits }: Props) {
   const [state, formAction, isPending] = useActionState(createSwitch, initialState)
 
   return (
@@ -46,6 +58,9 @@ export default function CreateSwitchForm() {
               placeholder="contact@example.com"
               className={inputClass}
             />
+            <p className="text-[11px] text-[#b0b0a4]">
+              You can add more contacts after creating the switch.
+            </p>
           </div>
 
           <div className="flex flex-col gap-1.5 sm:col-span-2">
@@ -94,19 +109,43 @@ export default function CreateSwitchForm() {
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
             <label htmlFor="grace_period_minutes" className={labelClass}>
-              Grace period (minutes)
+              Grace period (minutes){' '}
+              {!limits.graceConfigurable && (
+                <span className="text-[#c0c0b4] font-normal">
+                  fixed at {formatGrace(limits.gracePeriodDefaultMinutes)} on Free
+                </span>
+              )}
+              {limits.graceConfigurable && (
+                <span className="text-[#c0c0b4] font-normal">
+                  {limits.gracePeriodMinMinutes}–{limits.gracePeriodMaxMinutes} minutes
+                </span>
+              )}
             </label>
             <input
               id="grace_period_minutes"
               name="grace_period_minutes"
               type="number"
               required
-              min="1"
-              defaultValue={60}
+              min={limits.gracePeriodMinMinutes}
+              max={limits.gracePeriodMaxMinutes}
+              step={5}
+              disabled={!limits.graceConfigurable}
+              defaultValue={limits.gracePeriodDefaultMinutes}
               className={inputClass}
             />
+            {!limits.graceConfigurable && (
+              <p className="text-[11px] text-[#b0b0a4]">
+                <Link
+                  href="/account"
+                  className="underline underline-offset-2 hover:text-[#1a1a17]"
+                >
+                  Upgrade to Pro
+                </Link>{' '}
+                for a configurable grace period (30 min – 12h).
+              </p>
+            )}
           </div>
         </div>
 

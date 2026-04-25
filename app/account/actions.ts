@@ -3,8 +3,15 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import {
+  createCheckout,
+  getCustomerPortalUrl,
+} from '@/utils/lemonsqueezy'
 
 type Result = { error: string | null; success: boolean }
+type CheckoutResult =
+  | { ok: true; url: string }
+  | { ok: false; error: string }
 
 export async function changePassword(
   _prevState: Result,
@@ -58,4 +65,76 @@ export async function deleteAccount(): Promise<{ error: string | null }> {
   if (error) return { error: error.message }
 
   redirect('/login')
+}
+
+// ── Start a Lemon Squeezy checkout for the current user ─────────────────────
+
+export async function startCheckout(): Promise<CheckoutResult> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Unauthorized' }
+
+  const storeId = process.env.LEMONSQUEEZY_STORE_ID
+  const variantId = process.env.LEMONSQUEEZY_PRO_VARIANT_ID
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (!storeId || !variantId || !appUrl) {
+    return {
+      ok: false,
+      error: 'Checkout is not fully configured yet.',
+    }
+  }
+
+  // Don't start a new checkout if the user is already an active Pro.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('plan, subscription_status')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (profile?.plan === 'pro' && profile.subscription_status === 'active') {
+    return { ok: false, error: 'You already have an active Pro subscription.' }
+  }
+
+  try {
+    const checkout = await createCheckout({
+      storeId,
+      variantId,
+      userId: user.id,
+      email: user.email ?? '',
+      redirectUrl: `${appUrl}/account?upgraded=1`,
+      testMode: process.env.LEMONSQUEEZY_TEST_MODE === '1',
+    })
+    return { ok: true, url: checkout.url }
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : 'Failed to start checkout.',
+    }
+  }
+}
+
+// ── Get the Lemon Squeezy customer-portal URL for an existing subscriber ────
+
+export async function getManageUrl(): Promise<CheckoutResult> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Unauthorized' }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('lemonsqueezy_subscription_id')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (!profile?.lemonsqueezy_subscription_id) {
+    return { ok: false, error: 'No subscription found.' }
+  }
+
+  const url = await getCustomerPortalUrl(profile.lemonsqueezy_subscription_id)
+  if (!url) return { ok: false, error: 'Could not load customer portal.' }
+  return { ok: true, url }
 }

@@ -2,6 +2,7 @@ import { logger, schedules } from "@trigger.dev/sdk/v3";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import { randomBytes } from "crypto";
+import { escapeHtml } from "../utils/escape";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -98,25 +99,32 @@ export const dailyReminder = schedules.task({
             expires_at: expiresAt.toISOString(),
           });
 
+        // Escape user-controlled fields before they hit the recipient's inbox.
+        const safeName = escapeHtml(sw.name);
+        const safeTime = escapeHtml(sw.check_in_time);
+        const safeGrace = escapeHtml(sw.grace_period_minutes);
+
         if (tokenError) {
           logger.warn(`Failed to create token for switch "${sw.name}": ${tokenError.message}`);
           // Fall back to a plain list item with no button
           switchItems.push(
             `<li style="margin-bottom:16px">
-              <strong>${sw.name}</strong> — by ${sw.check_in_time} UTC
-              (+ ${sw.grace_period_minutes} min grace)
+              <strong>${safeName}</strong> — by ${safeTime} UTC
+              (+ ${safeGrace} min grace)
             </li>`
           );
           continue;
         }
 
+        // Token is hex-only (randomBytes.toString("hex")) so safe in a URL,
+        // but escape the full URL defensively before putting it in an href.
         const checkinUrl = `${baseUrl}/api/checkin?token=${token}`;
 
         switchItems.push(
           `<li style="margin-bottom:16px">
-            <strong>${sw.name}</strong> — by ${sw.check_in_time} UTC
-            (+ ${sw.grace_period_minutes} min grace)<br/>
-            <a href="${checkinUrl}"
+            <strong>${safeName}</strong> — by ${safeTime} UTC
+            (+ ${safeGrace} min grace)<br/>
+            <a href="${escapeHtml(checkinUrl)}"
                style="display:inline-block;margin-top:8px;padding:8px 18px;background:#ffffff;color:#0e0e0e;font-size:13px;font-weight:500;border-radius:6px;text-decoration:none;">
               I'm okay ✓
             </a>

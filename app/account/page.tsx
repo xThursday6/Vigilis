@@ -1,8 +1,11 @@
+import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
+import { getUserPlan } from '@/utils/subscription'
 import ChangePasswordForm from './ChangePasswordForm'
 import DeleteAccountSection from './DeleteAccountSection'
+import SubscriptionSection from './SubscriptionSection'
 
 export default async function AccountPage() {
   const supabase = await createClient()
@@ -11,6 +14,16 @@ export default async function AccountPage() {
   } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
+
+  const [plan, profileRow] = await Promise.all([
+    getUserPlan(user.id),
+    supabase
+      .from('profiles')
+      .select('subscription_status, subscription_renews_at, subscription_ends_at, lemonsqueezy_subscription_id')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then((r) => r.data),
+  ])
 
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
@@ -28,7 +41,29 @@ export default async function AccountPage() {
       </nav>
 
       <div className="max-w-3xl mx-auto px-6 py-12">
-        <p className="text-xs text-[#b0b0a4] mb-10">{user.email}</p>
+        <div className="flex items-center gap-2 mb-10">
+          <p className="text-xs text-[#b0b0a4]">{user.email}</p>
+          <span
+            className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded-full font-medium ${
+              plan === 'pro'
+                ? 'bg-[#f4ecfb] text-[#6b3fa0]'
+                : 'bg-[#f4f4f0] text-[#9e9e92]'
+            }`}
+          >
+            {plan}
+          </span>
+        </div>
+
+        {/* Subscription */}
+        <Suspense>
+          <SubscriptionSection
+            plan={plan}
+            subscriptionStatus={profileRow?.subscription_status ?? null}
+            renewsAt={profileRow?.subscription_renews_at ?? null}
+            endsAt={profileRow?.subscription_ends_at ?? null}
+            hasSubscriptionId={!!profileRow?.lemonsqueezy_subscription_id}
+          />
+        </Suspense>
 
         {/* Change password */}
         <section className="mb-12">
